@@ -1,9 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { QuestionCard, Question } from "@/components/QuestionCard";
 import { SurveyNavigation } from "@/components/SurveyNavigation";
 import { StepQuestions } from "@/components/StepQuestions";
 import { DashboardButton } from "@/components/DashboardButton";
+import { supabase } from "@/integrations/supabase/client";
+import { classifyRespondent } from "@/lib/segmentationMapping";
 import { toast } from "@/hooks/use-toast";
 
 // Survey step structure
@@ -395,7 +397,25 @@ const Index = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
   const mainContentRef = useRef<HTMLElement>(null);
+
+  // Check if any surveys exist in database
+  useEffect(() => {
+    checkForExistingSurveys();
+  }, []);
+
+  const checkForExistingSurveys = async () => {
+    try {
+      const { count } = await supabase
+        .from('survey_responses')
+        .select('*', { count: 'exact', head: true });
+      
+      setHasCompletedSurvey((count || 0) > 0);
+    } catch (error) {
+      console.error('Error checking surveys:', error);
+    }
+  };
   const currentStep = marketResearchSurvey.steps[currentStepIndex];
   const isLastStep = currentStepIndex === marketResearchSurvey.steps.length - 1;
   const canGoPrevious = currentStepIndex > 0;
@@ -425,32 +445,100 @@ const Index = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
-    // Save response to localStorage for segmentation analysis
-    const response = {
-      id: `response-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      answers: answers
-    };
-    
-    // Get existing responses and add new one
-    const existingResponses = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
-    existingResponses.push(response);
-    localStorage.setItem('surveyResponses', JSON.stringify(existingResponses));
-    
-    console.log("Survey completed:", answers);
-    
-    // Show success message
-    toast({
-      title: "Survey Completed!",
-      description: "Thank you for your valuable feedback. Check the dashboard to see market insights.",
-    });
-    
-    // Reset survey or redirect
-    setTimeout(() => {
-      setCurrentStepIndex(0);
-      setAnswers({});
+    try {
+      // Generate consumer ID
+      const { data: consumerIdData, error: consumerIdError } = await supabase
+        .rpc('generate_consumer_id');
+      
+      if (consumerIdError) {
+        throw consumerIdError;
+      }
+      
+      const consumerId = consumerIdData;
+      
+      // Classify market segment
+      const classifications = classifyRespondent(answers);
+      const primarySegment = classifications.length > 0 ? classifications[0].segment : 'Unknown';
+      const confidence = classifications.length > 0 ? classifications[0].probability : 0;
+      
+      // Create survey response record
+      const { data: responseData, error: responseError } = await supabase
+        .from('survey_responses')
+        .insert({
+          consumer_id: consumerId,
+          is_completed: true,
+          total_steps: marketResearchSurvey.steps.length,
+          completed_steps: marketResearchSurvey.steps.length,
+          classified_segments: JSON.parse(JSON.stringify(classifications)),
+          primary_segment: primarySegment,
+          confidence_score: confidence,
+          completed_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (responseError) {
+        throw responseError;
+      }
+      
+      // Save individual question answers
+      const questionAnswers = [];
+      for (const [questionId, answer] of Object.entries(answers)) {
+        const [stepIdStr] = questionId.split('.');
+        const stepId = parseInt(stepIdStr);
+        
+        // Find question type from survey structure
+        let questionType = 'single-choice';
+        for (const step of marketResearchSurvey.steps) {
+          const question = step.questions.find(q => q.id === questionId);
+          if (question) {
+            questionType = question.type;
+            break;
+          }
+        }
+        
+        questionAnswers.push({
+          response_id: responseData.id,
+          step_id: stepId,
+          question_id: questionId,
+          question_type: questionType,
+          answer_value: answer
+        });
+      }
+      
+      const { error: answersError } = await supabase
+        .from('question_answers')
+        .insert(questionAnswers);
+      
+      if (answersError) {
+        throw answersError;
+      }
+      
+      // Show success message
+      toast({
+        title: "Survey Completed!",
+        description: `Thank you for your feedback! You are classified as: ${primarySegment}`,
+      });
+      
+      // Update state to show dashboard button
+      setHasCompletedSurvey(true);
+      
+      // Reset survey after delay
+      setTimeout(() => {
+        setCurrentStepIndex(0);
+        setAnswers({});
+        setIsSubmitting(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error saving survey:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save survey. Please try again.",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
   return <div className="min-h-screen bg-background">
       {/* Enhanced Header */}
@@ -485,7 +573,7 @@ const Index = () => {
       </main>
 
       {/* Dashboard Button - Show after first survey completion */}
-      {localStorage.getItem('surveyResponses') && (
+      {hasCompletedSurvey && (
         <div className="fixed top-6 right-6 z-50">
           <DashboardButton />
         </div>

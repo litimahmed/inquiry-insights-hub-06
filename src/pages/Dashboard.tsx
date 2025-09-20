@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SegmentationMatrix } from '@/components/SegmentationMatrix';
 import { BeachheadRecommendation } from '@/components/BeachheadRecommendation';
 import { 
@@ -13,12 +14,15 @@ import {
   SegmentationCriteria 
 } from '@/types/segmentation';
 import { classifyRespondent, generateSegmentInsights } from '@/lib/segmentationMapping';
-import { Users, Target, TrendingUp, BarChart3, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Users, Target, TrendingUp, BarChart3, ArrowLeft, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const [matrix, setMatrix] = useState<MatrixType | null>(null);
   const [respondents, setRespondents] = useState<RespondentProfile[]>([]);
+  const [consumerList, setConsumerList] = useState<any[]>([]);
   const [beachheadAnalysis, setBeachheadAnalysis] = useState<BeachheadAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,36 +30,76 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
     
-    // Load respondent data from localStorage
-    const savedResponses = localStorage.getItem('surveyResponses');
-    if (savedResponses) {
-      const responses = JSON.parse(savedResponses);
-      const profiles: RespondentProfile[] = responses.map((response: any, index: number) => {
-        const classifications = classifyRespondent(response.answers);
-        const primarySegment = classifications[0]?.segment || 'Urban Professionals';
+    try {
+      // Load survey responses from Supabase
+      const { data: responses, error: responsesError } = await supabase
+        .from('survey_responses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (responsesError) {
+        toast({
+          title: "Error",
+          description: "Failed to load survey data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Load question answers
+      const { data: answers, error: answersError } = await supabase
+        .from('question_answers')
+        .select('*');
+
+      if (answersError) {
+        toast({
+          title: "Error", 
+          description: "Failed to load answer data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Group answers by response_id
+      const answersGrouped = answers?.reduce((acc, answer) => {
+        if (!acc[answer.response_id]) acc[answer.response_id] = {};
+        acc[answer.response_id][answer.question_id] = answer.answer_value;
+        return acc;
+      }, {} as Record<string, Record<string, any>>) || {};
+
+      // Convert to RespondentProfile format
+      const profiles: RespondentProfile[] = responses?.map(response => {
+        const responseAnswers = answersGrouped[response.id] || {};
         
         return {
-          id: `respondent-${index}`,
+          id: response.id,
           timestamp: new Date(response.timestamp),
-          answers: response.answers,
-          classifiedSegments: classifications,
-          primarySegment,
-          confidence: classifications[0]?.probability || 0
+          answers: responseAnswers,
+          classifiedSegments: (response.classified_segments as any) || [],
+          primarySegment: response.primary_segment as MarketSegment || 'Urban Professionals',
+          confidence: response.confidence_score || 0
         };
-      });
-      
+      }) || [];
+
       setRespondents(profiles);
+      setConsumerList(responses || []);
       generateMatrix(profiles);
       generateBeachheadAnalysis(profiles);
-    } else {
-      // Initialize empty matrix
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       initializeEmptyMatrix();
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const initializeEmptyMatrix = () => {
@@ -363,12 +407,85 @@ export default function Dashboard() {
       <Tabs defaultValue="matrix" className="space-y-6">
         <TabsList>
           <TabsTrigger value="matrix">Segmentation Matrix</TabsTrigger>
+          <TabsTrigger value="consumers">Consumer List</TabsTrigger>
           <TabsTrigger value="beachhead">Beachhead Analysis</TabsTrigger>
           <TabsTrigger value="insights">Segment Insights</TabsTrigger>
         </TabsList>
 
         <TabsContent value="matrix">
           {matrix && <SegmentationMatrix matrix={matrix} />}
+        </TabsContent>
+
+        <TabsContent value="consumers">
+          <Card>
+            <CardHeader>
+              <CardTitle>Consumer Inquiries</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                View individual consumer survey responses and classifications
+              </p>
+            </CardHeader>
+            <CardContent>
+              {consumerList.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Consumer ID</TableHead>
+                      <TableHead>Completion</TableHead>
+                      <TableHead>Market Segment</TableHead>
+                      <TableHead>Confidence</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {consumerList.map((consumer) => (
+                      <TableRow key={consumer.id}>
+                        <TableCell className="font-medium">
+                          {consumer.consumer_id}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={consumer.is_completed ? "default" : "secondary"}>
+                            {consumer.is_completed ? "Completed" : "In Progress"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {consumer.primary_segment ? (
+                            <Badge variant="outline">{consumer.primary_segment}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">Not classified</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {consumer.confidence_score ? 
+                            `${(consumer.confidence_score * 100).toFixed(1)}%` : 
+                            'N/A'
+                          }
+                        </TableCell>
+                        <TableCell>
+                          {new Date(consumer.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Link to={`/consumer/${consumer.consumer_id.replace('Consumer #', '')}`}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No consumer inquiries yet.</p>
+                  <Link to="/">
+                    <Button className="mt-4">Start First Survey</Button>
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="beachhead">

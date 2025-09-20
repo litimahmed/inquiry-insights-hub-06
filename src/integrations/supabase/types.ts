@@ -14,13 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      question_answers: {
+        Row: {
+          answer_value: Json
+          created_at: string
+          id: string
+          question_id: string
+          question_type: string
+          response_id: string
+          step_id: number
+        }
+        Insert: {
+          answer_value: Json
+          created_at?: string
+          id?: string
+          question_id: string
+          question_type: string
+          response_id: string
+          step_id: number
+        }
+        Update: {
+          answer_value?: Json
+          created_at?: string
+          id?: string
+          question_id?: string
+          question_type?: string
+          response_id?: string
+          step_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "survey_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          classified_segments: Json | null
+          completed_at: string | null
+          completed_steps: number
+          confidence_score: number | null
+          consumer_id: string
+          created_at: string
+          id: string
+          is_completed: boolean
+          primary_segment: string | null
+          timestamp: string
+          total_steps: number
+          updated_at: string
+        }
+        Insert: {
+          classified_segments?: Json | null
+          completed_at?: string | null
+          completed_steps?: number
+          confidence_score?: number | null
+          consumer_id: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          primary_segment?: string | null
+          timestamp?: string
+          total_steps?: number
+          updated_at?: string
+        }
+        Update: {
+          classified_segments?: Json | null
+          completed_at?: string | null
+          completed_steps?: number
+          confidence_score?: number | null
+          consumer_id?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          primary_segment?: string | null
+          timestamp?: string
+          total_steps?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_consumer_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
