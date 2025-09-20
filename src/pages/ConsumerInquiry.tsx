@@ -54,7 +54,13 @@ export default function ConsumerInquiry() {
   }, [consumerId]);
 
   const fetchConsumerData = async () => {
-    if (!consumerId) return;
+    if (!consumerId) {
+      console.log('No consumerId provided');
+      return;
+    }
+
+    console.log('Raw consumerId from params:', consumerId);
+    console.log('Searching for consumer_id:', `Consumer #${consumerId}`);
 
     try {
       // Fetch survey response
@@ -64,7 +70,10 @@ export default function ConsumerInquiry() {
         .eq('consumer_id', `Consumer #${consumerId}`)
         .single();
 
+      console.log('Supabase response:', responseData, responseError);
+
       if (responseError) {
+        console.error('Supabase error:', responseError);
         toast({
           title: "Error",
           description: "Failed to fetch consumer data",

@@ -446,11 +446,17 @@ const Index = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('Starting survey submission...');
+      console.log('Survey answers:', answers);
+      
       // Generate consumer ID
       const { data: consumerIdData, error: consumerIdError } = await supabase
         .rpc('generate_consumer_id');
       
+      console.log('Generated consumer ID:', consumerIdData, consumerIdError);
+      
       if (consumerIdError) {
+        console.error('Consumer ID generation failed:', consumerIdError);
         throw consumerIdError;
       }
       
@@ -461,23 +467,32 @@ const Index = () => {
       const primarySegment = classifications.length > 0 ? classifications[0].segment : 'Unknown';
       const confidence = classifications.length > 0 ? classifications[0].probability : 0;
       
+      console.log('Market classification:', { classifications, primarySegment, confidence });
+      
       // Create survey response record
+      const responsePayload = {
+        consumer_id: consumerId,
+        is_completed: true,
+        total_steps: marketResearchSurvey.steps.length,
+        completed_steps: marketResearchSurvey.steps.length,
+        classified_segments: JSON.parse(JSON.stringify(classifications)),
+        primary_segment: primarySegment,
+        confidence_score: confidence,
+        completed_at: new Date().toISOString()
+      };
+      
+      console.log('Survey response payload:', responsePayload);
+      
       const { data: responseData, error: responseError } = await supabase
         .from('survey_responses')
-        .insert({
-          consumer_id: consumerId,
-          is_completed: true,
-          total_steps: marketResearchSurvey.steps.length,
-          completed_steps: marketResearchSurvey.steps.length,
-          classified_segments: JSON.parse(JSON.stringify(classifications)),
-          primary_segment: primarySegment,
-          confidence_score: confidence,
-          completed_at: new Date().toISOString()
-        })
+        .insert(responsePayload)
         .select()
         .single();
       
+      console.log('Survey response result:', responseData, responseError);
+      
       if (responseError) {
+        console.error('Survey response insertion failed:', responseError);
         throw responseError;
       }
       
