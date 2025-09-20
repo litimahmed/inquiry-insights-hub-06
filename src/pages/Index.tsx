@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { QuestionCard, Question } from "@/components/QuestionCard";
 import { SurveyNavigation } from "@/components/SurveyNavigation";
@@ -468,6 +468,7 @@ const Index = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const mainContentRef = useRef<HTMLElement>(null);
 
   const currentStep = marketResearchSurvey.steps[currentStepIndex];
   
@@ -482,12 +483,12 @@ const Index = () => {
     return answer !== undefined && answer !== "" && answer !== null;
   });
 
-  const handleAnswer = (answer: any, questionId: string) => {
+  const handleAnswer = useCallback((answer: any, questionId: string) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
-  };
+  }, []);
 
   const handleNext = () => {
     if (!isLastStep) {
@@ -542,7 +543,7 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main ref={mainContentRef} className="max-w-4xl mx-auto px-6 py-8">
         <StepQuestions
           questions={currentStep.questions}
           answers={answers}
