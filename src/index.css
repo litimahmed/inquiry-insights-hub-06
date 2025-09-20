@@ -6,6 +6,23 @@
 
 @layer base {
   :root {
+    /* Typography */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    
+    /* Typography tokens */
+    --text-3xl: 1.875rem;
+    --text-2xl: 1.5rem;
+    --text-xl: 1.25rem;
+    --text-lg: 1.125rem;
+    --text-base: 1rem;
+    --text-sm: 0.875rem;
+    --text-xs: 0.75rem;
+    
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+
     /* Professional white background with subtle variations */
     --background: 0 0% 100%;
     --foreground: 220 13% 18%;

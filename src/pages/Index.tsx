@@ -515,26 +515,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-6 py-12">
         {/* Step Title */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Step {currentStep.id}: {currentStep.title}
+        <div className="mb-12">
+          <h1 className="text-3xl font-semibold text-foreground mb-4 tracking-tight">
+            {currentStep.title}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground font-light leading-relaxed">
             {currentStep.description}
           </p>
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-8">
+        <div className="mb-16">
           <ProgressIndicator
             currentStep={currentStepIndex + 1}
             totalSteps={marketResearchSurvey.steps.length}
           />
-          <div className="mt-2 text-sm text-muted-foreground text-center">
+          <div className="mt-4 text-sm font-medium text-muted-foreground text-center bg-muted/30 rounded-full px-4 py-2 inline-block mx-auto">
             Step {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
           </div>
         </div>
@@ -550,8 +550,8 @@ const Index = () => {
       </main>
 
       {/* Fixed Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border">
-        <div className="max-w-4xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
+        <div className="max-w-5xl mx-auto">
           <SurveyNavigation
             onPrevious={handlePrevious}
             onNext={handleNext}
@@ -565,7 +565,7 @@ const Index = () => {
       </div>
 
       {/* Bottom padding to account for fixed navigation */}
-      <div className="h-20"></div>
+      <div className="h-24"></div>
     </div>
   );
 };
