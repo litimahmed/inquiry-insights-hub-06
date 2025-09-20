@@ -517,27 +517,38 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Corporate Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="space-y-3">
-            <h1 className="text-2xl font-semibold text-foreground">
-              {currentStep.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {currentStep.description}
-            </p>
+      {/* Enhanced Header */}
+      <div className="relative bg-gradient-to-br from-card via-card to-muted/20 border-b border-border/50">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.05),transparent_50%)] pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.03),transparent_50%)] pointer-events-none"></div>
+        
+        <div className="relative max-w-4xl mx-auto px-6 py-10">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-foreground leading-tight tracking-tight">
+                {currentStep.title}
+              </h1>
+              <p className="text-base text-muted-foreground/90 leading-relaxed max-w-2xl">
+                {currentStep.description}
+              </p>
+            </div>
           </div>
           
-          {/* Progress Indicator */}
-          <div className="mt-6">
+          {/* Enhanced Progress Section */}
+          <div className="mt-8 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-muted-foreground">
+                Progress
+              </div>
+              <div className="text-sm font-medium text-foreground">
+                {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
+              </div>
+            </div>
             <ProgressIndicator
               currentStep={currentStepIndex + 1}
               totalSteps={marketResearchSurvey.steps.length}
             />
-            <div className="mt-2 text-xs text-muted-foreground">
-              Step {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
-            </div>
           </div>
         </div>
       </div>
