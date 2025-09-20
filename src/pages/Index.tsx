@@ -3,6 +3,7 @@ import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { QuestionCard, Question } from "@/components/QuestionCard";
 import { SurveyNavigation } from "@/components/SurveyNavigation";
 import { StepQuestions } from "@/components/StepQuestions";
+import { DashboardButton } from "@/components/DashboardButton";
 import { toast } from "@/hooks/use-toast";
 
 // Survey step structure
@@ -423,14 +424,32 @@ const Index = () => {
   };
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
-    // Simulate API submission
+    
+    // Save response to localStorage for segmentation analysis
+    const response = {
+      id: `response-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      answers: answers
+    };
+    
+    // Get existing responses and add new one
+    const existingResponses = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+    existingResponses.push(response);
+    localStorage.setItem('surveyResponses', JSON.stringify(existingResponses));
+    
+    console.log("Survey completed:", answers);
+    
+    // Show success message
+    toast({
+      title: "Survey Completed!",
+      description: "Thank you for your valuable feedback. Check the dashboard to see market insights.",
+    });
+    
+    // Reset survey or redirect
     setTimeout(() => {
+      setCurrentStepIndex(0);
+      setAnswers({});
       setIsSubmitting(false);
-      toast({
-        title: "Survey Submitted Successfully",
-        description: "Thank you for your valuable feedback. Your responses have been recorded."
-      });
     }, 2000);
   };
   return <div className="min-h-screen bg-background">
@@ -464,6 +483,13 @@ const Index = () => {
       <main ref={mainContentRef} className="max-w-4xl mx-auto px-6 py-8">
         <StepQuestions questions={currentStep.questions} answers={answers} onAnswer={handleAnswer} />
       </main>
+
+      {/* Dashboard Button - Show after first survey completion */}
+      {localStorage.getItem('surveyResponses') && (
+        <div className="fixed top-6 right-6 z-50">
+          <DashboardButton />
+        </div>
+      )}
 
       {/* Fixed Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border">
