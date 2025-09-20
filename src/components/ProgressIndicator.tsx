@@ -11,7 +11,7 @@ export const ProgressIndicator = ({
   totalSteps, 
   className = "" 
 }: ProgressIndicatorProps) => {
-  const progressPercentage = (currentStep / totalSteps) * 100;
+  const progressPercentage = ((currentStep - 1) / totalSteps) * 100;
 
   return (
     <div className={`space-y-3 ${className}`}>
