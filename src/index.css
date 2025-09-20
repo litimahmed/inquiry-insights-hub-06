@@ -2,30 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Survey Design System - Clean, Corporate, Formal */
+/* Corporate Survey Design System - Professional, Formal, Clean */
 
 @layer base {
   :root {
-    /* Typography */
+    /* Corporate Typography */
     --font-sans: 'Inter', system-ui, sans-serif;
     
-    /* Typography tokens */
-    --text-3xl: 1.875rem;
-    --text-2xl: 1.5rem;
-    --text-xl: 1.25rem;
-    --text-lg: 1.125rem;
-    --text-base: 1rem;
-    --text-sm: 0.875rem;
-    --text-xs: 0.75rem;
-    
-    --leading-tight: 1.25;
-    --leading-snug: 1.375;
-    --leading-normal: 1.5;
-    --leading-relaxed: 1.625;
+    /* Professional corporate colors */
+    --background: 250 250% 99%;
+    --foreground: 215 25% 27%;
 
-    /* Professional white background with subtle variations */
-    --background: 0 0% 100%;
-    --foreground: 220 13% 18%;
+    /* Corporate primary - Professional navy blue */
+    --primary: 214 84% 20%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 214 84% 16%;
+
+    /* Clean secondary colors */
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 215 25% 27%;
+    --secondary-hover: 220 15% 90%;
+
+    /* Muted professional grays */
+    --muted: 220 13% 95%;
+    --muted-foreground: 215 15% 50%;
+
+    /* Corporate card styling */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+    --card-border: 220 13% 85%;
+
+    /* Professional form inputs */
+    --input: 0 0% 100%;
+    --input-border: 220 13% 80%;
+    --input-focus: 214 84% 20%;
+    
+    /* Clean borders and focus states */
+    --border: 220 13% 85%;
+    --ring: 214 84% 20%;
+
+    /* Professional accent */
+    --accent: 220 15% 97%;
+    --accent-foreground: 215 25% 27%;
+
+    /* Status colors - corporate appropriate */
+    --success: 142 50% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 80% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Corporate shadows - subtle and professional */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-form: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    
+    /* Professional spacing and radius */
+    --radius: 0.5rem;
 
     /* Card backgrounds for survey containers */
     --card: 0 0% 100%;

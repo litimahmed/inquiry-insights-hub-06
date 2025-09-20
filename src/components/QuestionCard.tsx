@@ -51,7 +51,7 @@ export const QuestionCard = ({
             placeholder={question.placeholder || "Enter your answer..."}
             value={answer}
             onChange={(e) => handleAnswerChange(e.target.value)}
-            className="text-lg py-4 px-4 bg-background border-2 border-border rounded-xl focus:border-primary focus:ring-0 transition-all duration-200"
+            className="h-11 px-3 text-sm bg-input border border-input-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         );
 
@@ -61,29 +61,27 @@ export const QuestionCard = ({
             placeholder={question.placeholder || "Enter your detailed response..."}
             value={answer}
             onChange={(e) => handleAnswerChange(e.target.value)}
-            className="text-lg py-4 px-4 bg-background border-2 border-border rounded-xl focus:border-primary focus:ring-0 transition-all duration-200 min-h-32 resize-none"
+            className="min-h-[100px] px-3 py-2 text-sm bg-input border border-input-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors resize-none"
           />
         );
 
       case "single-choice":
         return (
           <RadioGroup value={answer} onValueChange={handleAnswerChange}>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {question.options?.map((option, index) => (
-                <div key={index} className="group">
-                  <div className="flex items-center space-x-4 p-4 rounded-xl bg-background hover:bg-muted/50 border-2 border-border hover:border-primary/50 transition-all duration-200 cursor-pointer">
-                    <RadioGroupItem 
-                      value={option} 
-                      id={`option-${index}`}
-                      className="w-5 h-5 border-2 border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                    />
-                    <Label 
-                      htmlFor={`option-${index}`}
-                      className="text-foreground font-medium cursor-pointer flex-1 text-lg leading-relaxed"
-                    >
-                      {option}
-                    </Label>
-                  </div>
+                <div key={index} className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem 
+                    value={option} 
+                    id={`option-${index}`}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor={`option-${index}`}
+                    className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed"
+                  >
+                    {option}
+                  </Label>
                 </div>
               ))}
             </div>
@@ -92,30 +90,28 @@ export const QuestionCard = ({
 
       case "multiple-choice":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {question.options?.map((option, index) => (
-              <div key={index} className="group">
-                <div className="flex items-center space-x-4 p-4 rounded-xl bg-background hover:bg-muted/50 border-2 border-border hover:border-primary/50 transition-all duration-200 cursor-pointer">
-                  <Checkbox
-                    id={`checkbox-${index}`}
-                    checked={answer.includes && answer.includes(option)}
-                    onCheckedChange={(checked) => {
-                      const newAnswer = answer || [];
-                      if (checked) {
-                        handleAnswerChange([...newAnswer, option]);
-                      } else {
-                        handleAnswerChange(newAnswer.filter((a: string) => a !== option));
-                      }
-                    }}
-                    className="w-5 h-5 border-2 border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                  />
-                  <Label 
-                    htmlFor={`checkbox-${index}`}
-                    className="text-foreground font-medium cursor-pointer flex-1 text-lg leading-relaxed"
-                  >
-                    {option}
-                  </Label>
-                </div>
+              <div key={index} className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+                <Checkbox
+                  id={`checkbox-${index}`}
+                  checked={answer.includes && answer.includes(option)}
+                  onCheckedChange={(checked) => {
+                    const newAnswer = answer || [];
+                    if (checked) {
+                      handleAnswerChange([...newAnswer, option]);
+                    } else {
+                      handleAnswerChange(newAnswer.filter((a: string) => a !== option));
+                    }
+                  }}
+                  className="mt-0.5"
+                />
+                <Label 
+                  htmlFor={`checkbox-${index}`}
+                  className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed"
+                >
+                  {option}
+                </Label>
               </div>
             ))}
           </div>
@@ -123,14 +119,14 @@ export const QuestionCard = ({
 
       case "rating":
         return (
-          <div className="flex space-x-3">
+          <div className="flex space-x-2">
             {[1, 2, 3, 4, 5].map((rating) => (
               <Button
                 key={rating}
                 variant={answer === rating ? "default" : "outline"}
-                size="lg"
+                size="sm"
                 onClick={() => handleAnswerChange(rating)}
-                className="w-16 h-16 text-xl font-semibold rounded-xl border-2 hover:scale-105 transition-all duration-200"
+                className="w-10 h-10 text-sm font-medium"
               >
                 {rating}
               </Button>
@@ -144,24 +140,26 @@ export const QuestionCard = ({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <h2 className="text-2xl font-semibold text-foreground leading-tight tracking-tight">
-          {question.title}
-          {question.required && (
-            <span className="text-destructive ml-1 text-lg">*</span>
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-foreground leading-tight">
+            {question.title}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
+          </h3>
+          
+          {question.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {question.description}
+            </p>
           )}
-        </h2>
-        
-        {question.description && (
-          <p className="text-muted-foreground text-lg leading-relaxed font-light">
-            {question.description}
-          </p>
-        )}
-      </div>
+        </div>
 
-      <div className="mt-8">
-        {renderInput()}
+        <div className="pt-2">
+          {renderInput()}
+        </div>
       </div>
     </div>
   );

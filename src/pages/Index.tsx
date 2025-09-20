@@ -18,8 +18,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
   steps: [
     {
       id: 1,
-      title: "End-User Snapshot (Who & Context)",
-      description: "Identifies the real person using the service",
+      title: "Demographics & Context",
+      description: "Personal background and household information",
       questions: [
         {
           id: "1.1",
@@ -74,8 +74,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 2,
-      title: "Jobs-to-be-Done / Primary Use Cases",
-      description: "What exact grocery jobs need to be solved",
+      title: "Shopping Patterns & Needs",
+      description: "Primary grocery shopping requirements and patterns",
       questions: [
         {
           id: "2.1",
@@ -117,8 +117,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 3,
-      title: "Pain Points (Emotional/Operational Triggers)",
-      description: "Pain points that motivate switching to new services",
+      title: "Shopping Challenges",
+      description: "Current frustrations and operational difficulties",
       questions: [
         {
           id: "3.1",
@@ -160,8 +160,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 4,
-      title: "Current Workarounds & Competition",
-      description: "Existing solutions and alternatives people use",
+      title: "Current Solutions",
+      description: "Existing alternatives and workaround strategies",
       questions: [
         {
           id: "4.1",
@@ -195,8 +195,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 5,
-      title: "Willingness to Pay & Pricing Sensitivity",
-      description: "Pricing expectations and payment preferences",
+      title: "Pricing & Payment",
+      description: "Budget expectations and preferred payment methods",
       questions: [
         {
           id: "5.1",
@@ -230,8 +230,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 6,
-      title: "Frequency & AOV (Average Order Value)",
-      description: "Shopping patterns and spending behavior",
+      title: "Purchase Behavior",
+      description: "Shopping frequency and average spending patterns",
       questions: [
         {
           id: "6.1",
@@ -265,8 +265,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 7,
-      title: "Accessibility & Acquisition Channels",
-      description: "How to reach customers cheaply and repeatedly",
+      title: "Information Sources",
+      description: "Communication channels and service discovery methods",
       questions: [
         {
           id: "7.1",
@@ -308,8 +308,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 8,
-      title: "Decision-Making Unit (DMU) & Purchase Flow",
-      description: "Who makes decisions and influences purchases",
+      title: "Decision Making",
+      description: "Household purchase decisions and approval processes",
       questions: [
         {
           id: "8.1",
@@ -350,8 +350,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 9,
-      title: "Operational Constraints & Complementary Assets",
-      description: "Logistics realities and delivery requirements",
+      title: "Delivery Requirements",
+      description: "Logistical constraints and operational considerations",
       questions: [
         {
           id: "9.1",
@@ -385,8 +385,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 10,
-      title: "Lead / Lighthouse Customers & Social Influence",
-      description: "Who gives credibility and accelerates adoption",
+      title: "Trust & Influence",
+      description: "Social validation and credibility factors",
       questions: [
         {
           id: "10.1",
@@ -421,8 +421,8 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
     },
     {
       id: 11,
-      title: "Regulatory / Trust / Safety Concerns",
-      description: "Trust barriers and safety requirements",
+      title: "Trust & Safety",
+      description: "Security concerns and quality assurance requirements",
       questions: [
         {
           id: "11.1",
@@ -515,43 +515,44 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        {/* Step Title */}
-        <div className="mb-12">
-          <h1 className="text-3xl font-semibold text-foreground mb-4 tracking-tight">
-            {currentStep.title}
-          </h1>
-          <p className="text-lg text-muted-foreground font-light leading-relaxed">
-            {currentStep.description}
-          </p>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="mb-16">
-          <ProgressIndicator
-            currentStep={currentStepIndex + 1}
-            totalSteps={marketResearchSurvey.steps.length}
-          />
-          <div className="mt-4 text-sm font-medium text-muted-foreground text-center bg-muted/30 rounded-full px-4 py-2 inline-block mx-auto">
-            Step {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
+    <div className="min-h-screen bg-background">
+      {/* Corporate Header */}
+      <div className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="space-y-3">
+            <h1 className="text-2xl font-semibold text-foreground">
+              {currentStep.title}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {currentStep.description}
+            </p>
+          </div>
+          
+          {/* Progress Indicator */}
+          <div className="mt-6">
+            <ProgressIndicator
+              currentStep={currentStepIndex + 1}
+              totalSteps={marketResearchSurvey.steps.length}
+            />
+            <div className="mt-2 text-xs text-muted-foreground">
+              Step {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* All Questions in Current Step */}
-        <div className="mb-8">
-          <StepQuestions
-            questions={currentStep.questions}
-            answers={answers}
-            onAnswer={handleAnswer}
-          />
-        </div>
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        <StepQuestions
+          questions={currentStep.questions}
+          answers={answers}
+          onAnswer={handleAnswer}
+        />
       </main>
 
       {/* Fixed Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
-        <div className="max-w-5xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border">
+        <div className="max-w-4xl mx-auto">
           <SurveyNavigation
             onPrevious={handlePrevious}
             onNext={handleNext}
@@ -565,7 +566,7 @@ const Index = () => {
       </div>
 
       {/* Bottom padding to account for fixed navigation */}
-      <div className="h-24"></div>
+      <div className="h-20"></div>
     </div>
   );
 };
