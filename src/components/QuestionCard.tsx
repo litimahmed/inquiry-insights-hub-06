@@ -70,7 +70,15 @@ export const QuestionCard = ({
           <RadioGroup value={answer} onValueChange={handleAnswerChange}>
             <div className="space-y-3">
               {question.options?.map((option, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+                <div 
+                  key={index} 
+                  className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAnswerChange(option);
+                  }}
+                >
                   <RadioGroupItem 
                     value={option} 
                     id={`option-${index}`}
@@ -78,7 +86,7 @@ export const QuestionCard = ({
                   />
                   <Label 
                     htmlFor={`option-${index}`}
-                    className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed"
+                    className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed pointer-events-none"
                   >
                     {option}
                   </Label>
@@ -92,7 +100,21 @@ export const QuestionCard = ({
         return (
           <div className="space-y-3">
             {question.options?.map((option, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+              <div 
+                key={index} 
+                className="flex items-start space-x-3 p-3 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const newAnswer = answer || [];
+                  const isChecked = newAnswer.includes(option);
+                  if (!isChecked) {
+                    handleAnswerChange([...newAnswer, option]);
+                  } else {
+                    handleAnswerChange(newAnswer.filter((a: string) => a !== option));
+                  }
+                }}
+              >
                 <Checkbox
                   id={`checkbox-${index}`}
                   checked={answer.includes && answer.includes(option)}
@@ -108,7 +130,7 @@ export const QuestionCard = ({
                 />
                 <Label 
                   htmlFor={`checkbox-${index}`}
-                  className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed"
+                  className="text-sm text-foreground cursor-pointer flex-1 leading-relaxed pointer-events-none"
                 >
                   {option}
                 </Label>
