@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { QuestionCard, Question } from "@/components/QuestionCard";
 import { SurveyNavigation } from "@/components/SurveyNavigation";
+import { StepQuestions } from "@/components/StepQuestions";
 import { toast } from "@/hooks/use-toast";
 
 // Survey step structure
@@ -465,56 +466,38 @@ const marketResearchSurvey: { steps: SurveyStep[] } = {
 
 const Index = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentStep = marketResearchSurvey.steps[currentStepIndex];
-  const currentQuestion = currentStep.questions[currentQuestionIndex];
   
-  // Calculate total progress
-  const totalQuestions = marketResearchSurvey.steps.reduce((sum, step) => sum + step.questions.length, 0);
-  const currentQuestionNumber = marketResearchSurvey.steps
-    .slice(0, currentStepIndex)
-    .reduce((sum, step) => sum + step.questions.length, 0) + currentQuestionIndex + 1;
-  
-  const isLastQuestionInStep = currentQuestionIndex === currentStep.questions.length - 1;
   const isLastStep = currentStepIndex === marketResearchSurvey.steps.length - 1;
-  const isLastQuestion = isLastStep && isLastQuestionInStep;
   
-  const canGoPrevious = currentQuestionNumber > 1;
-  const canGoNext = answers[currentQuestion.id] !== undefined && answers[currentQuestion.id] !== "";
+  const canGoPrevious = currentStepIndex > 0;
+  
+  // Check if all required questions in current step are answered
+  const canGoNext = currentStep.questions.every(question => {
+    if (!question.required) return true;
+    const answer = answers[question.id];
+    return answer !== undefined && answer !== "" && answer !== null;
+  });
 
-  const handleAnswer = (answer: any) => {
+  const handleAnswer = (answer: any, questionId: string) => {
     setAnswers(prev => ({
       ...prev,
-      [currentQuestion.id]: answer
+      [questionId]: answer
     }));
   };
 
   const handleNext = () => {
-    if (isLastQuestionInStep) {
-      // Move to next step
-      if (!isLastStep) {
-        setCurrentStepIndex(prev => prev + 1);
-        setCurrentQuestionIndex(0);
-      }
-    } else {
-      // Move to next question in current step
-      setCurrentQuestionIndex(prev => prev + 1);
+    if (!isLastStep) {
+      setCurrentStepIndex(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (currentQuestionIndex === 0) {
-      // Move to previous step
-      if (currentStepIndex > 0) {
-        setCurrentStepIndex(prev => prev - 1);
-        setCurrentQuestionIndex(marketResearchSurvey.steps[currentStepIndex - 1].questions.length - 1);
-      }
-    } else {
-      // Move to previous question in current step
-      setCurrentQuestionIndex(prev => prev - 1);
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
     }
   };
 
@@ -548,20 +531,20 @@ const Index = () => {
         {/* Progress Indicator */}
         <div className="mb-8">
           <ProgressIndicator
-            currentStep={currentQuestionNumber}
-            totalSteps={totalQuestions}
+            currentStep={currentStepIndex + 1}
+            totalSteps={marketResearchSurvey.steps.length}
           />
           <div className="mt-2 text-sm text-muted-foreground text-center">
-            Question {currentQuestionIndex + 1} of {currentStep.questions.length} in this step
+            Step {currentStepIndex + 1} of {marketResearchSurvey.steps.length}
           </div>
         </div>
 
-        {/* Question Card */}
+        {/* All Questions in Current Step */}
         <div className="mb-8">
-          <QuestionCard
-            question={currentQuestion}
+          <StepQuestions
+            questions={currentStep.questions}
+            answers={answers}
             onAnswer={handleAnswer}
-            currentAnswer={answers[currentQuestion.id]}
           />
         </div>
       </main>
@@ -575,7 +558,7 @@ const Index = () => {
             onSubmit={handleSubmit}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
-            isLastQuestion={isLastQuestion}
+            isLastQuestion={isLastStep}
             isSubmitting={isSubmitting}
           />
         </div>
